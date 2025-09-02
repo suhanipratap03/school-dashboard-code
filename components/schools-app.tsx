@@ -354,13 +354,35 @@ function ShowSchoolsList({
 
 export default function SchoolsApp() {
   const [schools, setSchools] = useState<School[]>([])
-  const [currentPage, setCurrentPage] = useState<"add" | "show">("add")
+  const [currentPage, setCurrentPage] = useState<"add" | "show">("show")
   const [selectedSchool, setSelectedSchool] = useState<School | null>(null)
 
   const handleAddSchool = (newSchool: School) => {
     setSchools((prev) => [...prev, newSchool])
     setCurrentPage("show")
   }
+
+  useEffect(() => {
+    try {
+      const saved = typeof window !== "undefined" ? localStorage.getItem("schools") : null
+      if (saved) {
+        const parsed: School[] = JSON.parse(saved)
+        if (Array.isArray(parsed)) setSchools(parsed)
+      }
+    } catch {
+      // ignore parse errors silently
+    }
+  }, [])
+
+  useEffect(() => {
+    try {
+      if (typeof window !== "undefined") {
+        localStorage.setItem("schools", JSON.stringify(schools))
+      }
+    } catch {
+      // ignore write errors silently
+    }
+  }, [schools])
 
   return (
     <div className="bg-slate-50 min-h-screen font-sans antialiased text-slate-900">
